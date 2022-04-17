@@ -1,5 +1,8 @@
 # nepse-api-helper
 
+Nepse has made it really hard to use their API, you can read more on how to 
+this library was implemented in this doc [https://github.com/dahsameer/nepse-api-document](https://github.com/dahsameer/nepse-api-document)
+
 i haven't actually tested the library but doing something like following should work. 
 
 you can install from npm using `npm install nepse-api-helper`
