@@ -22,3 +22,12 @@ const marketStatus = await GetMarketStatus();
 ```
 
 this package is my first and was made rapidly so there might be many bad practices, I am happy to receive constructive criticism and pull requests.
+
+## SSL issue
+
+You might get SSL issue, in which case, you will need to make your runtime ignore 
+the SSL error. this can be done in nodejs by exporting this environment variable 
+
+```bash
+export NODE_TLS_REJECT_UNAUTHORIZED='0'
+```

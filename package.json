@@ -1,12 +1,12 @@
 {
   "name": "nepse-api-helper",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "a wrapper to use nepse api easily since they set up weird restrictions",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "repository": "git@github.com:dahsameer/nepse-api-helper.git",
   "author": "Sameer Dahal",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "dependencies": {},
   "devDependencies": {
     "typescript": "^4.6.3"
