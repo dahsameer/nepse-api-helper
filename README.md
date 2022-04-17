@@ -2,6 +2,8 @@
 
 i haven't actually tested the library but doing something like following should work. 
 
+you can install from npm using `npm install nepse-api-helper`
+
 ```javascript
 import { UpdateSecurityBriefs, GetSecurityDetail, GetSecurityBriefs, GetMarketStatus } from "nepse-api-helper";
 
