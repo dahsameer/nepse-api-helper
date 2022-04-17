@@ -1,0 +1,17 @@
+{
+  "name": "nepse-fetch",
+  "version": "0.1.0",
+  "description": "a wrapper to use nepse api easily since they set up weird restrictions",
+  "main": "dist/index.js",
+  "repository": "git@github.com:dahsameer/nepse-fetch.git",
+  "author": "Sameer Dahal",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^4.6.3"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "export NODE_TLS_REJECT_UNAUTHORIZED='0' && node --experimental-fetch dist/index.js"
+  }
+}
