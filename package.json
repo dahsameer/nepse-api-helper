@@ -1,6 +1,6 @@
 {
 	"name": "nepse-api-helper",
-	"version": "1.0.3",
+	"version": "1.1.0",
 	"description": "a wrapper to use nepse api easily since they set up weird restrictions",
 	"keywords": ["nepse", "api", "nepal stock", "nepal"],
 	"main": "./dist/index.js",
