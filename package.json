@@ -1,19 +1,19 @@
 {
-  "name": "nepse-api-helper",
-  "version": "1.0.3",
-  "description": "a wrapper to use nepse api easily since they set up weird restrictions",
-  "keywords": ["nepse", "api", "nepal stock", "nepal"],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "repository": "git@github.com:dahsameer/nepse-api-helper.git",
-  "author": "Sameer Dahal",
-  "license": "UNLICENSED",
-  "dependencies": {},
-  "devDependencies": {
-    "typescript": "^4.6.3"
-  },
-  "scripts": {
-    "build": "tsc",
-    "test": "export NODE_TLS_REJECT_UNAUTHORIZED='0' && node --experimental-fetch dist/index.js"
-  }
+	"name": "nepse-api-helper",
+	"version": "1.0.3",
+	"description": "a wrapper to use nepse api easily since they set up weird restrictions",
+	"keywords": ["nepse", "api", "nepal stock", "nepal"],
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"repository": "git@github.com:dahsameer/nepse-api-helper.git",
+	"author": "Sameer Dahal",
+	"license": "UNLICENSED",
+	"dependencies": {},
+	"devDependencies": {
+		"typescript": "^4.6.3"
+	},
+	"scripts": {
+		"build": "tsc",
+		"test": "export NODE_TLS_REJECT_UNAUTHORIZED='0' && node --experimental-fetch dist/index.js"
+	}
 }
