@@ -1,5 +1,5 @@
 import { it, expect, describe } from "vitest";
-import { get_access_token, get_valid_token, get_market_status, instantiate_nepse_helper, get_security_detail, security_brief_cache } from "../lib";
+import { get_access_token, get_valid_token, get_market_status, instantiate_nepse_helper, get_security_detail } from "../lib";
 import { Prove } from "../lib/prove";
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -40,6 +40,6 @@ describe("all library tests", async () => {
     it("getting security detail", async ()  => {
         const detail = await get_security_detail('HLI');
         console.log(detail);
-        expect(true, "hehe").toBe(true);
+        expect(true, "lets ignore this test for now").toBe(true);
     })
 });
