@@ -1,6 +1,6 @@
 {
 	"name": "nepse-api-helper",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "a wrapper to use nepse api easily since they set up weird restrictions",
 	"keywords": [
 		"nepse",
