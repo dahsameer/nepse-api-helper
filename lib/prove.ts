@@ -6,8 +6,11 @@ interface Prove {
 	salt2: number;
 	salt3: number;
 	salt4: number;
+	salt5: number;
 	serverTime: number;
 	tokenType: string | null;
+	isDisplayActive: boolean;
+	popupDocFor: string;
 }
 
 interface ProveExtra {
