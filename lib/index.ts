@@ -13,6 +13,9 @@ let bdx: CallableFunction;
 let ndx: CallableFunction;
 let mdx: CallableFunction;
 
+let cachedToken: string | null = null;
+let tokenExpiry: number = 0;
+
 async function instantiate_nepse_helper() {
 	const response = await fetch(`${BASE_URL}/assets/prod/css.wasm`);
 	const buffer = await response.arrayBuffer();
@@ -60,11 +63,21 @@ async function get_raw_access_object(): Promise<Prove | null> {
 }
 
 async function get_access_token(): Promise<string | null> {
-	const proveResponse: Prove | null = await get_raw_access_object();
+	const now = Date.now();
 
-	if (proveResponse !== null) {
-		return get_valid_token(proveResponse);
+	// Return cached token if it's still valid
+	if (cachedToken && now < tokenExpiry) {
+		return cachedToken;
 	}
+
+	// Fetch new token
+	const proveResponse: Prove | null = await get_raw_access_object();
+	if (proveResponse !== null) {
+		cachedToken = get_valid_token(proveResponse);
+		tokenExpiry = now + 5 * 60 * 1000; // Set expiry time to 5 minutes from now
+		return cachedToken;
+	}
+
 	return null;
 }
 
@@ -121,14 +134,13 @@ function get_valid_body_id(marketId: number) {
 }
 
 async function get_security_detail(symbol: string): Promise<SecurityDetail | null> {
+	const token = await get_access_token();
 	const security = security_brief_cache.find(s => s.symbol.toLowerCase() === symbol.toLowerCase());
 	if (!security) {
 		return null;
 	}
 	const marketStatus = await get_market_status();
 	const bodyId = get_valid_body_id(marketStatus?.id ?? 0);
-	const token = await get_access_token();
-	console.log(`${BASE_URL}/api/nots/security/${security.id}`);
 	const securityDetail: SecurityDetail | null = await fetch(`${BASE_URL}/api/nots/security/${security.id}`, {
 		headers: {
 			"User-Agent": "Mozilla/5.0",

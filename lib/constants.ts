@@ -1,4 +1,4 @@
-const BASE_URL: string = `https://www.nepalstock.com.np`;
+const BASE_URL: string = `https://nepalstock.com.np`;
 
 export {
 	BASE_URL
