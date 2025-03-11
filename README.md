@@ -2,7 +2,7 @@
 
 Nepse has made it really hard to use their API, this library just makes it easier to do stuff i guess
 
-works as of 2023-06-25
+works as of 2025-03-08
 
 you can install from npm using `npm install nepse-api-helper`
 
