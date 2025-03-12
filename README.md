@@ -1,26 +1,39 @@
 # nepse-api-helper
 
-Nepse has made it really hard to use their API, this library just makes it easier to do stuff i guess
+Nepse has made it really hard to use their API, this library just makes it easier to do stuff i guess. made just for *EDUCATIONAL PURPOSE*
 
-works as of 2025-03-08
+works as of 2025-03-12
 
 you can install from npm using `npm install nepse-api-helper`
 
 ```javascript
-import { get_access_token, get_valid_token, get_market_status, instantiate_nepse_helper, get_security_detail, get_security_briefs } from "nepse-api-helper";
+import { nepseClient } from "nepse-api-helper";
 
-//at first before anything, call instantiate_nepse_helper(). This is required to get the deobsfucation logic for token. 
-await instantiate_nepse_helper();
+//at first before anything, call initialize() on nepseClient. This is required to get the deobsfucation logic for token. 
+await nepseClient.initialize();
 
 //now you can use the functions that you need. for example
 
-const securityLists = await get_security_briefs(); //this will return a list of all securities including active and inactive, with their status.
+ //this will return a list of all securities including active and inactive, with their status.
+const securities = await nepseClient.getSecurities();
 
 //get the detials of a security
-const securityDetail = await get_security_detail('NIFRA');
+const security = await nepseClient.getSecurityDetail("NIFRA");
 
 //if you want to check if market is open or not, you can use, GetMarketStatus
-const marketStatus = await get_market_status();
+const marketStatus = await nepseClient.getMarketStatus();
+
+//if you want to make your own custom API call for a function that isn't defined in this library, you can just get the token first
+const token = await nepseClient.getToken();
+//and then you can use this token to call other APIs that you need to like:
+const response = await fetch(
+    `${BASE_URL}/api/nots/securityDailyTradeStat/58`,
+    {
+        method: "GET",
+        headers: createHeaders(token)
+    }
+);
+
 ```
 
 this package is my first and was made rapidly so there might be many bad practices, I am happy to receive constructive criticism and pull requests.
