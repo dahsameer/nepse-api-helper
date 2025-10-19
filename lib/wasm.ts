@@ -1,11 +1,10 @@
 import { BASE_URL } from "./constants";
 import { createNepseError } from "./errors";
-import { NepseError, NepseWasmExports } from "./types";
+import { NepseDecodeFunction, NepseError, NepseExports } from "./types";
 
-// wasm.ts - WASM-related functions
 export async function loadWasmModule(
 	wasmUrl: string = `${BASE_URL}/assets/prod/css.wasm`
-): Promise<NepseWasmExports> {
+): Promise<NepseExports> {
 	try {
 		const response = await fetch(wasmUrl);
 
@@ -20,11 +19,11 @@ export async function loadWasmModule(
 		const { instance } = await WebAssembly.instantiate(buffer);
 
 		return {
-			cdx: instance.exports.cdx as unknown as NepseWasmExports['cdx'],
-			rdx: instance.exports.rdx as unknown as NepseWasmExports['rdx'],
-			bdx: instance.exports.bdx as unknown as NepseWasmExports['bdx'],
-			ndx: instance.exports.ndx as unknown as NepseWasmExports['ndx'],
-			mdx: instance.exports.mdx as unknown as NepseWasmExports['mdx']
+			cdx: instance.exports.cdx as NepseDecodeFunction,
+			rdx: instance.exports.rdx as NepseDecodeFunction,
+			bdx: instance.exports.bdx as NepseDecodeFunction,
+			ndx: instance.exports.ndx as NepseDecodeFunction,
+			mdx: instance.exports.mdx as NepseDecodeFunction
 		};
 	} catch (error) {
 		if ((error as NepseError).code) {

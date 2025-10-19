@@ -1,6 +1,6 @@
 {
 	"name": "nepse-api-helper",
-	"version": "2.0.1",
+	"version": "2.5.0",
 	"description": "a wrapper to use nepse api easily since they set up weird restrictions",
 	"keywords": [
 		"nepse",
@@ -10,12 +10,12 @@
 	],
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
-	"repository": "git@github.com:dahsameer/nepse-api-helper.git",
+	"repository": "https://github.com/dahsameer/nepse-api-helper",
 	"author": "Sameer Dahal",
 	"license": "UNLICENSED",
 	"devDependencies": {
-		"typescript": "^5.8.2",
-		"vitest": "^3.0.8"
+		"typescript": "^5.9.3",
+		"vitest": "^3.2.4"
 	},
 	"scripts": {
 		"build": "tsc",

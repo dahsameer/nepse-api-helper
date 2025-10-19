@@ -163,12 +163,14 @@ export type IndexDetail = {
 	currentValue: number;
 }
 
-export type NepseWasmExports = {
-	cdx: (salt1: number, salt2: number, salt3: number, salt4: number, salt5: number) => number;
-	rdx: (salt1: number, salt2: number, salt4: number, salt3: number, salt5: number) => number;
-	bdx: (salt1: number, salt2: number, salt4: number, salt3: number, salt5: number) => number;
-	ndx: (salt1: number, salt2: number, salt4: number, salt3: number, salt5: number) => number;
-	mdx: (salt1: number, salt2: number, salt4: number, salt3: number, salt5: number) => number;
+export type NepseDecodeFunction = (var0: number, var1: number, var2: number, var3: number, var4: number) => number;
+
+export type NepseExports = {
+	cdx: NepseDecodeFunction;
+	rdx: NepseDecodeFunction;
+	bdx: NepseDecodeFunction;
+	ndx: NepseDecodeFunction;
+	mdx: NepseDecodeFunction;
 }
 
 export type NepseError = Error & {
@@ -186,7 +188,7 @@ export type Cache<T> = {
 }
 
 export type ClientState = {
-	wasmExports: NepseWasmExports | null;
+	nepseExports: NepseExports | null;
 	token: {
 		value: string | null;
 		expiry: number;
@@ -195,4 +197,8 @@ export type ClientState = {
 		securityBriefs: Cache<SecurityBrief[]>;
 	};
 	isInitialized: boolean;
+}
+
+export type InitializeOptions = {
+	useWasm?: boolean;
 }

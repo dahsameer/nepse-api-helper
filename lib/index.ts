@@ -1,13 +1,14 @@
 import { getAccessToken } from "./auth";
 import { createNepseError } from "./errors";
 import { createHeaders } from "./http";
+import { getHardCodedNepseExports } from "./nepseExports";
 import { fetchMarketStatus, fetchNepseIndex, fetchSecurityBriefs, fetchSecurityDetail } from "./security";
-import { ClientState, IndexDetail, MarketStatus, SecurityBrief, SecurityDetail } from "./types";
+import { ClientState, IndexDetail, InitializeOptions, MarketStatus, NepseExports, SecurityBrief, SecurityDetail } from "./types";
 import { loadWasmModule } from "./wasm";
 
 export function createInitialState(): ClientState {
 	return {
-		wasmExports: null,
+		nepseExports: null,
 		token: {
 			value: null,
 			expiry: 0
@@ -30,22 +31,33 @@ function initializationGuard() {
 	}
 }
 
-export async function initialize(): Promise<void> {
+export async function initialize(options: InitializeOptions = {}): Promise<void> {
+	const { useWasm = true } = options;
 	if (globalState.isInitialized) {
 		return;
 	}
 
-	// Load WASM module
-	const wasmExports = await loadWasmModule();
+	let nepseExports: NepseExports;
 
-	// Update global state
+	if (useWasm) {
+		try {
+			nepseExports = await loadWasmModule();
+			console.log('Initialized with WASM module');
+		} catch (error) {
+			console.warn('Failed to load WASM, falling back to TypeScript implementation', error);
+			nepseExports = getHardCodedNepseExports();
+		}
+	} else {
+		nepseExports = getHardCodedNepseExports();
+		console.log('Initialized with TypeScript implementation');
+	}
+	
 	globalState = {
 		...globalState,
-		wasmExports,
+		nepseExports,
 		isInitialized: true,
 	};
 
-	// Pre-fetch security briefs
 	const [newState] = await fetchSecurityBriefs(globalState);
 	globalState = newState;
 }

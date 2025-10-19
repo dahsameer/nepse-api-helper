@@ -1,7 +1,7 @@
 import { BASE_URL, TOKEN_TTL_MS } from "./constants";
 import { createNepseError } from "./errors";
 import { fetchWithTimeout } from "./http";
-import { ClientState, NepseError, NepseWasmExports, Prove } from "./types";
+import { ClientState, NepseError, NepseExports, Prove } from "./types";
 
 // auth.ts - Authentication functions
 export async function getProveObject(): Promise<Prove> {
@@ -37,9 +37,9 @@ export async function getProveObject(): Promise<Prove> {
 	}
 }
 
-export function generateValidToken(proveObj: Prove, wasmExports: NepseWasmExports): string {
+export function generateValidToken(proveObj: Prove, nepseExports: NepseExports): string {
 	const { accessToken, salt1, salt2, salt3, salt4, salt5 } = proveObj;
-	const { cdx, rdx, bdx, ndx, mdx } = wasmExports;
+	const { cdx, rdx, bdx, ndx, mdx } = nepseExports;
 
 	const c = cdx(salt1, salt2, salt3, salt4, salt5);
 	const r = rdx(salt1, salt2, salt4, salt3, salt5);
@@ -58,12 +58,11 @@ export function generateValidToken(proveObj: Prove, wasmExports: NepseWasmExport
 export async function getAccessToken(state: ClientState): Promise<[ClientState, string]> {
 	const now = Date.now();
 
-	// Return cached token if valid
 	if (state.token.value && now < state.token.expiry) {
 		return [state, state.token.value];
 	}
 
-	if (!state.wasmExports) {
+	if (!state.nepseExports) {
 		throw createNepseError(
 			'WASM module not instantiated',
 			'WASM_NOT_INSTANTIATED'
@@ -72,9 +71,8 @@ export async function getAccessToken(state: ClientState): Promise<[ClientState, 
 
 	try {
 		const proveObj = await getProveObject();
-		const token = generateValidToken(proveObj, state.wasmExports);
+		const token = generateValidToken(proveObj, state.nepseExports);
 
-		// Return new token and updated state
 		const newState = {
 			...state,
 			token: {

@@ -1,10 +1,13 @@
-import { it, expect, describe, beforeAll, afterAll } from "vitest";
+import { it, expect, describe, beforeAll } from "vitest";
 import { nepseClient } from '../lib';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
+beforeAll(async () => {
+	await nepseClient.initialize({ useWasm: true });
+});
+
 describe("security functions tests", async () => {
-	await nepseClient.initialize();
 
 	it("getting token", async () => {
 		const token = await nepseClient.getToken();
