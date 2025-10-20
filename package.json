@@ -1,12 +1,15 @@
 {
 	"name": "nepse-api-helper",
-	"version": "2.5.0",
+	"version": "2.6.0",
 	"description": "a wrapper to use nepse api easily since they set up weird restrictions",
 	"keywords": [
 		"nepse",
 		"api",
 		"nepal stock",
-		"nepal"
+		"nepal",
+		"nepal share",
+		"nepal stock market",
+		"nepal share market"
 	],
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
