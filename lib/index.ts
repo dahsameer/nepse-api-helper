@@ -1,12 +1,18 @@
 import { getAccessToken } from "./auth";
-import { createNepseError } from "./errors";
+import { createNepseError, NepseError } from "./errors";
 import { createHeaders } from "./http";
 import { getHardCodedNepseExports } from "./nepseExports";
 import { fetchMarketStatus, fetchNepseIndex, fetchSecurityBriefs, fetchSecurityDetail } from "./security";
-import { ClientState, IndexDetail, InitializeOptions, MarketStatus, NepseExports, SecurityBrief, SecurityDetail } from "./types";
 import { loadWasmModule } from "./wasm";
+import type { ClientState, IndexDetail, InitializeOptions, Logger, MarketStatus, NepseExports, SecurityBrief, SecurityDetail } from './types';
+export * from './types';
+export { createNepseError, NepseError };
+export { createHeaders };
+export { nepseAxios } from './http';
+export { BASE_URL } from './constants';
+export { getHardCodedNepseExports, loadWasmModule };
 
-export function createInitialState(): ClientState {
+export function createInitialState(logger?: Logger): ClientState {
 	return {
 		nepseExports: null,
 		token: {
@@ -16,9 +22,16 @@ export function createInitialState(): ClientState {
 		caches: {
 			securityBriefs: {}
 		},
-		isInitialized: false
+		isInitialized: false,
+		logger: logger ?? defaultLogger
 	};
 }
+
+const defaultLogger = {
+	info: (msg: string, ...args: unknown[]) => { console.log(`INFO: ${msg}`, ...args); },
+	warn: (msg: string, ...args: unknown[]) => { console.warn(`WARN: ${msg}`, ...args); },
+	error: (msg: string, ...args: unknown[]) => { console.error(`ERROR: ${msg}`, ...args); }
+};
 
 let globalState = createInitialState();
 
@@ -32,26 +45,34 @@ function initializationGuard() {
 }
 
 export async function initialize(options: InitializeOptions = {}): Promise<void> {
-	const { useWasm = true } = options;
+	const { useWasm = true, logger } = options;
 	if (globalState.isInitialized) {
 		return;
 	}
 
+	// Set logger if provided
+	if (logger) {
+		globalState.logger = logger;
+	} else if (!globalState.logger) {
+		globalState.logger = defaultLogger;
+	}
+
 	let nepseExports: NepseExports;
+	const log = globalState.logger ?? defaultLogger;
 
 	if (useWasm) {
 		try {
 			nepseExports = await loadWasmModule();
-			console.log('Initialized with WASM module');
+			log.info('Initialized with WASM module');
 		} catch (error) {
-			console.warn('Failed to load WASM, falling back to TypeScript implementation', error);
+			log.warn('Failed to load WASM, falling back to TypeScript implementation', error);
 			nepseExports = getHardCodedNepseExports();
 		}
 	} else {
 		nepseExports = getHardCodedNepseExports();
-		console.log('Initialized with TypeScript implementation');
+		log.info('Initialized with TypeScript implementation');
 	}
-	
+
 	globalState = {
 		...globalState,
 		nepseExports,
@@ -111,3 +132,5 @@ export const nepseClient = {
 	getToken,
 	createHeaders
 };
+
+export default nepseClient;

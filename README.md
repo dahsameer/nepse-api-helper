@@ -1,4 +1,20 @@
+
 # nepse-api-helper
+
+> **A modern TypeScript library for seamless, robust access to the Nepal Stock Exchange (NEPSE) API.**
+
+---
+
+## Why use nepse-api-helper?
+
+- **Handles NEPSE's complex token logic and restrictions for you**
+- **Automatic caching and retry logic** for reliability and speed
+- **Pluggable logging** for full observability
+- **TypeScript-first**: strict types, generics, and DX
+- **WASM fallback**: always works, even if NEPSE changes their obfuscation
+- **Easy to test and extend**
+
+---
 
 [![npm version](https://img.shields.io/npm/v/nepse-api-helper.svg)](https://www.npmjs.com/package/nepse-api-helper)
 [![License: MIT](https://img.shields.io/badge/License-The%20Unlicense-yellow.svg)](https://opensource.org/license/unlicense)
@@ -13,8 +29,11 @@ A TypeScript/JavaScript library that simplifies interaction with the NEPSE (Nepa
 - **Dual Implementation**: Choose between WebAssembly or pure TypeScript implementations
 - **Built-in Caching**: Reduces API calls with intelligent caching mechanisms
 - **TypeScript Support**: Fully typed for better developer experience
-- **Cross-Platform**: Works in Node.js and modern browsers (but probably won't work in browser because of CORS)
+- **Cross-Platform**: Works in Node.js and modern browsers (CORS restrictions may apply)
+- **Pluggable Logging**: Inject your own logger for full control
 - **Easy to Use**: Simple, intuitive API
+
+---
 
 ## Installation
 
@@ -34,7 +53,7 @@ Or with pnpm:
 pnpm install nepse-api-helper
 ```
 
-## Quick Start
+## Quick Start (Minimal Example)
 
 ```typescript
 import { nepseClient } from "nepse-api-helper";
@@ -42,22 +61,60 @@ import { nepseClient } from "nepse-api-helper";
 // Initialize the client (required before any API calls)
 await nepseClient.initialize();
 
-// Get all securities
 const securities = await nepseClient.getSecurities();
-console.log(securities);
-
-// Get details of a specific security
-const nifraDetails = await nepseClient.getSecurityDetail("NIFRA");
-console.log(nifraDetails);
-
-// Check market status
-const marketStatus = await nepseClient.getMarketStatus();
-console.log(`Market is ${marketStatus.isOpen ? "open" : "closed"}`);
+console.log(securities[0]);
 ```
+
+## Quick Start (Advanced Example with Logger)
+
+```typescript
+import { nepseClient } from "nepse-api-helper";
+
+const logger = {
+  info: (msg, ...args) => console.log("INFO:", msg, ...args),
+  warn: (msg, ...args) => console.warn("WARN:", msg, ...args),
+  error: (msg, ...args) => console.error("ERROR:", msg, ...args),
+};
+
+await nepseClient.initialize({ logger });
+
+const marketStatus = await nepseClient.getMarketStatus();
+logger.info(`Market is ${marketStatus.isOpen ? "open" : "closed"}`);
+
+const detail = await nepseClient.getSecurityDetail("NIFRA");
+logger.info("NIFRA detail:", detail);
+```
+
+---
+
+
+## How it Works (Architecture)
+
+**Flow:**
+
+1. `initialize()` loads WASM or TypeScript fallback for NEPSE's token logic
+2. API calls use a short-lived token, auto-refreshed and cached
+3. All requests use custom headers (`Salter <token>`) and retry logic
+4. Security briefs and details are cached for performance
+5. All errors are thrown as `NepseError` with codes for easy handling
+6. Logging is pluggable: inject your own logger for full control
+
+**Diagram:**
+
+```
+User code
+  |
+  v
+nepseClient.initialize() --+--> WASM/TS loader
+                  |
+API call (getSecurities) --+--> token logic --> fetchWithRetry --> caching --> logger
+```
+
+---
 
 ## Initialization Options
 
-The library supports two initialization modes:
+The library supports two initialization modes and pluggable logging:
 
 ### 1. WebAssembly Mode (Default)
 
@@ -68,6 +125,9 @@ await nepseClient.initialize(); // Uses WASM by default
 
 // Or explicitly:
 await nepseClient.initialize({ useWasm: true });
+
+// With a custom logger:
+await nepseClient.initialize({ useWasm: true, logger });
 ```
 
 **Pros:**
@@ -99,7 +159,16 @@ await nepseClient.initialize({ useWasm: false });
 - May become outdated if NEPSE changes their logic
 - Requires manual updates
 
-## API Reference
+
+---
+
+## API Reference & Types
+
+- [Full TypeScript types](./lib/types.ts)
+- [Error codes](./lib/errors.ts)
+- [Constants](./lib/constants.ts)
+
+---
 
 ### Client Methods
 
@@ -152,34 +221,38 @@ const token = await nepseClient.getToken();
 
 ### Making Custom API Calls
 
-For endpoints not covered by the library, you can use the token to make custom requests:
+For endpoints not covered by the library, you can use the token to make custom requests. Note: the library now exports an Axios instance (`nepseAxios`) and `createHeaders` accepts an optional token and options object.
 
 ```typescript
-import { nepseClient, createHeaders, BASE_URL } from "nepse-api-helper";
+import { nepseClient, createHeaders, nepseAxios, BASE_URL } from "nepse-api-helper";
 
 // Initialize and get token
 await nepseClient.initialize();
 const token = await nepseClient.getToken();
 
-// Make custom API call
-const response = await fetch(`${BASE_URL}/api/nots/securityDailyTradeStat/58`, {
-  method: "GET",
-  headers: createHeaders(token),
+// Make custom API call using Axios
+const response = await nepseAxios.get(`${BASE_URL}/api/nots/securityDailyTradeStat/58`, {
+  headers: createHeaders(token)
 });
 
-const data = await response.json();
+const data = response.data;
 ```
 
 ### Utility Functions
 
-#### `createHeaders(token)`
+#### `createHeaders(token?, options?)`
 
-Creates headers object for NEPSE API requests.
+Creates headers object for NEPSE API requests. `token` is optional. If you need to omit the Authorization header (e.g. when loading the WASM blob or requesting the prove object), pass `{ omitAuthorization: true }` as the second argument.
 
 ```typescript
-const headers = createHeaders(token);
-// Returns: Headers object with Authorization and other required headers
+// With Authorization
+const headersWithAuth = createHeaders(token);
+
+// Without Authorization
+const headersWithoutAuth = createHeaders(undefined, { omitAuthorization: true });
 ```
+
+Note: when making POST/PUT requests use Axios' `data` option for request bodies (not `body`), and read results from `response.data`.
 
 ## TypeScript Types
 
@@ -194,15 +267,17 @@ import type {
 } from "nepse-api-helper";
 ```
 
-## Error Handling
 
-The library throws descriptive errors with error codes:
+---
+
+The library throws descriptive errors with error codes and supports pluggable logging:
 
 ```typescript
 try {
   await nepseClient.getSecurities();
 } catch (error) {
   if (error.code === "NOT_INITIALIZED") {
+    // Your logger will also receive this error
     console.error("Client not initialized. Call initialize() first.");
   } else if (error.code === "WASM_FETCH_ERROR") {
     console.error("Failed to load WASM module");
@@ -210,6 +285,9 @@ try {
     console.error("Unknown error:", error.message);
   }
 }
+
+// To capture logs, provide a logger when initializing:
+await nepseClient.initialize({ logger });
 ```
 
 ## Common Issues
@@ -246,7 +324,8 @@ If your environment doesn't support WebAssembly:
 await nepseClient.initialize({ useWasm: false });
 ```
 
-## Examples
+
+---
 
 ### Check if Market is Open
 
@@ -282,22 +361,23 @@ console.log(`Found ${activeSecurities.length} active securities`);
 ```typescript
 import { nepseClient } from "nepse-api-helper";
 
-await nepseClient.initialize();
+await nepseClient.initialize({ logger });
 
 const symbols = ["NIFRA", "NICL", "NABIL"];
 
 for (const symbol of symbols) {
   try {
     const detail = await nepseClient.getSecurityDetail(symbol);
-    console.log(`${symbol}: ${detail.securityName}`);
-    console.log(`  LTP: ${detail.lastTradedPrice}`);
+    console.log(`${symbol}: ${detail.name}`);
+    console.log(`  LTP: ${detail.lastTradePrice}`);
   } catch (error) {
     console.error(`Failed to fetch ${symbol}:`, error.message);
   }
 }
 ```
 
-## Testing
+
+---
 
 Run the test suite:
 
@@ -305,7 +385,8 @@ Run the test suite:
 pnpm test
 ```
 
-## Contributing
+
+---
 
 Contributions are welcome! This is my first npm package, so I appreciate:
 
@@ -333,15 +414,50 @@ pnpm test
 pnpm run build
 ```
 
-## License
+
+---
 
 The Unlicense
 
-## Disclaimer
+
+---
 
 This library is provided "as is" without warranty of any kind. It is created for educational purposes only. The author is not responsible for any misuse or any consequences of using this library. Always ensure you comply with NEPSE's terms of service and applicable regulations.
 
-## Status
+
+---
+
+## FAQ / Troubleshooting
+
+**Q: Why do I get SSL errors?**
+A: NEPSE's API uses a certificate that may not be trusted by Node.js. See "SSL Certificate Error" above for how to disable verification in dev.
+
+**Q: How do I mock API calls for tests?**
+A: Use a custom logger and mock `fetch` or `getAccessToken` in your tests. See `test/unit.spec.ts` for examples.
+
+**Q: How do I use my own logger?**
+A: Pass `{ logger }` to `initialize`. See the advanced example above.
+
+**Q: How do I use the TypeScript fallback?**
+A: Pass `{ useWasm: false }` to `initialize`.
+
+**Q: How do I get the raw token for custom requests?**
+A: Use `await nepseClient.getToken()` and pass it to `createHeaders(token)`.
+
+**Q: How do I get the latest types?**
+A: Import from `nepse-api-helper` or see [lib/types.ts](./lib/types.ts).
+
+---
+
+## Customization & Extensibility
+
+- **Logger:** Inject any logger (console, winston, pino, etc.)
+- **Fetch:** Mock or override fetch for tests
+- **Caching:** Extend or replace cache logic in `lib/cache.ts`
+- **Error Handling:** Catch `NepseError` and use error codes for robust handling
+- **WASM/TS:** Use fallback logic for environments without WASM
+
+---
 
 **Working as of:** October 19, 2025
 
