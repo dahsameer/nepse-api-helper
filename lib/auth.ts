@@ -1,30 +1,25 @@
 import { BASE_URL, TOKEN_TTL_MS } from "./constants";
 import { createNepseError } from "./errors";
-import { fetchWithTimeout } from "./http";
+import { nepseAxios } from "./http";
 import { ClientState, NepseError, NepseExports, Prove } from "./types";
 
-// auth.ts - Authentication functions
 export async function getProveObject(): Promise<Prove> {
 	try {
-		const response = await fetchWithTimeout(
-			`${BASE_URL}/api/authenticate/prove`,
-			{
-				headers: {
-					"User-Agent": "Mozilla/5.0",
-					"Referer": BASE_URL
-				},
-				method: "GET"
+		const response = await nepseAxios.get(`${BASE_URL}/api/authenticate/prove`, {
+			headers: {
+				"User-Agent": "Mozilla/5.0",
+				"Referer": BASE_URL
 			}
-		);
+		});
 
-		if (!response.ok) {
+		if (response.status !== 200) {
 			throw createNepseError(
 				`Failed to get prove object: ${response.status} ${response.statusText}`,
 				'PROVE_FETCH_ERROR'
 			);
 		}
 
-		return await response.json() as Prove;
+		return response.data as Prove;
 	} catch (error) {
 		if ((error as NepseError).code) {
 			throw error;
@@ -63,6 +58,9 @@ export async function getAccessToken(state: ClientState): Promise<[ClientState, 
 	}
 
 	if (!state.nepseExports) {
+		if (state.logger) {
+			state.logger.error('WASM module not instantiated');
+		}
 		throw createNepseError(
 			'WASM module not instantiated',
 			'WASM_NOT_INSTANTIATED'
@@ -83,6 +81,9 @@ export async function getAccessToken(state: ClientState): Promise<[ClientState, 
 
 		return [newState, token];
 	} catch (error) {
+		if (state.logger) {
+			state.logger.error('Failed to get access token', error);
+		}
 		throw createNepseError(
 			'Failed to get access token',
 			'TOKEN_ACQUISITION_ERROR',

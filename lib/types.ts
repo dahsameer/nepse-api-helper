@@ -1,7 +1,25 @@
+export type Logger = {
+	info: (msg: string, ...args: unknown[]) => void;
+	warn: (msg: string, ...args: unknown[]) => void;
+	error: (msg: string, ...args: unknown[]) => void;
+};
+
+export type ClientState = {
+	nepseExports: NepseExports | null;
+	token: {
+		value: string | null;
+		expiry: number;
+	};
+	caches: {
+		securityBriefs: Cache<SecurityBrief[]>;
+	};
+	isInitialized: boolean;
+	logger?: Logger;
+}
 export type MarketStatus = {
 	isOpen: string;
 	asOf: string;
-	id: number //we only care about id for the moment.
+	id: number;
 }
 
 export type Prove = {
@@ -187,18 +205,9 @@ export type Cache<T> = {
 	[key: string]: CacheItem<T>;
 }
 
-export type ClientState = {
-	nepseExports: NepseExports | null;
-	token: {
-		value: string | null;
-		expiry: number;
-	};
-	caches: {
-		securityBriefs: Cache<SecurityBrief[]>;
-	};
-	isInitialized: boolean;
-}
+// ...existing code...
 
 export type InitializeOptions = {
 	useWasm?: boolean;
+	logger?: Logger;
 }

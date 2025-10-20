@@ -1,8 +1,6 @@
 import { it, expect, describe, beforeAll } from "vitest";
 import { nepseClient } from '../lib';
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 beforeAll(async () => {
 	await nepseClient.initialize({ useWasm: true });
 });
