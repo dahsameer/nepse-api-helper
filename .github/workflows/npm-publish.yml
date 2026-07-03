@@ -11,7 +11,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      
+
     steps:
       - uses: actions/checkout@v4
       
@@ -34,6 +34,20 @@ jobs:
         
       - name: Test
         run: pnpm test
+
+      - name: Check OIDC environment
+        run: |
+          echo "ACTIONS_ID_TOKEN_REQUEST_URL=${ACTIONS_ID_TOKEN_REQUEST_URL:+present}"
+          echo "ACTIONS_ID_TOKEN_REQUEST_TOKEN=${ACTIONS_ID_TOKEN_REQUEST_TOKEN:+present}"
+
+      - name: Request OIDC token
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken("npm:registry.npmjs.org");
+            console.log(token ? "OIDC token acquired" : "No token");
       
       - name: Publish to NPM
-        run: pnpm publish --no-git-checks
+        run: pnpm publish --no-git-checks --provenance --reporter=append-only
+        env:
+          NPM_CONFIG_LOGLEVEL: verbose
