@@ -1,6 +1,6 @@
 {
 	"name": "nepse-api-helper",
-	"version": "2.6.0",
+	"version": "2.6.1",
 	"description": "a wrapper to use nepse api easily since they set up weird restrictions",
 	"keywords": [
 		"nepse",
@@ -17,15 +17,15 @@
 	"author": "Sameer Dahal",
 	"license": "UNLICENSED",
 	"devDependencies": {
-		"@types/node": "^25.5.0",
-		"typescript": "^5.9.3",
-		"vitest": "^4.1.0"
+		"@types/node": "^26.1.0",
+		"typescript": "^6.0.3",
+		"vitest": "^4.1.9"
 	},
 	"scripts": {
 		"build": "tsc",
 		"test": "vitest"
 	},
 	"dependencies": {
-		"axios": "^1.13.6"
+		"axios": "^1.18.1"
 	}
 }
